@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rivian R2 Launch Green Countdown</title>
+    <style>
+        :root {
+            --launch-green-dark: #2a352c;
+            --launch-green-main: #3d4f42;
+            --launch-green-light: #4e6353;
+            --bg-dark: #121513;
+            --lightbar-glow: #ffffff;
+            --card-bg: rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-dark);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .rivian-container {
+            width: 90%;
+            max-width: 750px;
+            background: linear-gradient(160deg, var(--launch-green-light), var(--launch-green-main) 40%, var(--launch-green-dark));
+            border-radius: 32px;
+            padding: 45px 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7),
+                        inset 0 1px 2px rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Rivian Signature Front Light Bar Design */
+        .fascia-lightbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding: 0 5px;
+        }
+
+        .stadium-light {
+            width: 30px;
+            height: 56px;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: 0 0 18px var(--lightbar-glow), 0 0 35px var(--lightbar-glow);
+            border: 2px solid #e0e0e0;
+        }
+
+        .center-bar {
+            flex-grow: 1;
+            height: 10px;
+            background: #ffffff;
+            margin: 0 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 14px var(--lightbar-glow), 0 0 28px var(--lightbar-glow);
+        }
+
+        .brand-title {
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 6px;
+        }
+
+        .target-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 35px;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        /* Countdown Display Grid */
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .time-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 22px 10px;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .time-box:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .time-value {
+            font-size: 3.2rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            margin-bottom: 8px;
+            background: linear-gradient(180deg, #ffffff, #d8d8d8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+        }
+
+        /* Vehicle Badge */
+        .badge {
+            display: inline-block;
+            margin-top: 35px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.85);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        @media (max-width: 650px) {
+            .countdown-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .time-value {
+                font-size: 2.5rem;
+            }
+            .stadium-light {
+                width: 20px;
+                height: 40px;
+                border-radius: 12px;
+            }
+            .center-bar {
+                height: 7px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="rivian-container">
+        <div class="fascia-lightbar">
+            <div class="stadium-light"></div>
+            <div class="center-bar"></div>
+            <div class="stadium-light"></div>
+        </div>
+
+        <div class="brand-title">Rivian R2</div>
+        <div class="target-title">September 16, 2026</div>
+
+        <div class="countdown-grid">
+            <div class="time-box">
+                <div class="time-value" id="days">00</div>
+                <div class="time-label">Days</div>
+            </div>
+            <div class="time-box">
+                <div class="time-value" id="hours">00</div>
+                <div class="time-label">Hours</div>
+            </div>
+            <div class="time-box">
+                <div class="time-value" id="minutes">00</div>
+                <div class="time-label">Minutes</div>
+            </div>
+            <div class="time-box">
+                <div class="time-value" id="seconds">00</div>
+                <div class="time-label">Seconds</div>
+            </div>
+        </div>
+
+        <div class="badge">R2D2 is coming!</div>
+    </div>
+
+    <script>
+        // Target Date: September 16, 2026 00:00:00
+        const targetDate = new Date("September 16, 2026 00:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.querySelector('.countdown-grid').innerHTML = 
+                    "<div style='grid-column: 1/-1; font-size: 2rem; font-weight: bold;'>The Rivian R2 Has Arrived!</div>";
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = String(days).padStart(2, '0');
+            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
+
+</body>
+</html>

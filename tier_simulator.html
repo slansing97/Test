@@ -1,0 +1,342 @@
+Ah, that is a glitch with the interactive preview window blocking the click events on those specific custom toggles.
+
+Since you are using the raw HTML file format, the most reliable way to get this working perfectly is for me to give you the fully updated HTML code directly. You can copy this, save it as an `.html` file, and it will run flawlessly in your browser with all the checkboxes fully clickable and the updated Tier 2 and Google Tasks logic intact.
+
+Here is the complete, working code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friday Check-in Simulator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #000; background: #fdfcfc;
+    }
+    .widget-container {
+      width: 100%; max-width: 708px; margin: 0 auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .header-card {
+      background: #f2f0f0; border-radius: 28px; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .header-eyebrow {
+      font-family: monospace; font-size: 12px; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #555;
+    }
+    .diagram-card {
+      background: #ffffff; border-radius: 28px; padding: 16px;
+      border: 1px solid #e3e3e3; overflow-x: auto;
+    }
+    .diagram-svg { width: 100%; max-width: 660px; height: auto; display: block; margin: 0 auto; }
+    .fc-node { transition: fill 0.3s, stroke 0.3s, opacity 0.3s; }
+    .fc-path { transition: stroke 0.3s, opacity 0.3s, stroke-width 0.3s; }
+    .fc-text { font-family: sans-serif; }
+    .fc-subtext { font-family: monospace; font-size: 12px; font-style: italic; }
+    .control-deck {
+      background: #ffffff; border-radius: 28px; padding: 20px 24px;
+      border: 1px solid #e3e3e3; display: flex; flex-direction: column; gap: 16px;
+    }
+    .control-group-title {
+      font-size: 13px; font-weight: 600; color: #555;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
+    }
+    .slider-row { display: flex; flex-direction: column; gap: 8px; }
+    .slider-header { display: flex; justify-content: space-between; align-items: center; }
+    .lumi-slider { width: 100%; cursor: pointer; height: 6px; border-radius: 4px; accent-color: #3186ff; }
+    .toggles-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+    }
+    .lumi-checkbox-label {
+      background: #f2f0f0; padding: 10px 14px; border-radius: 12px;
+      display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;
+      user-select: none; transition: background 0.2s;
+    }
+    .lumi-checkbox-label:hover { background: #e6e6e6; }
+    .lumi-checkbox-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #000; }
+    .tiers-container {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+    }
+    .tier-card {
+      background: #ffffff; border: 1px solid #e3e3e3; border-radius: 20px;
+      padding: 16px; display: flex; flex-direction: column; gap: 8px;
+      transition: all 0.3s; opacity: 0.6; transform: scale(0.98); position: relative;
+    }
+    .tier-card.is-active {
+      opacity: 1; transform: scale(1); background: #dcf1ff; border-color: transparent;
+    }
+    .tier-badge { font-family: monospace; font-size: 12px; text-transform: uppercase; color: #555; }
+    .tier-card.is-active .tier-badge { color: #3186ff; font-weight: 700; }
+    .tier-name { font-size: 18px; font-weight: 600; }
+    .tier-gpa { font-size: 12px; color: #555; }
+    .privileges-list {
+      display: flex; flex-direction: column; gap: 6px; margin-top: 6px;
+      padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    .privilege-item { font-size: 12px; line-height: 1.3; display: flex; align-items: flex-start; gap: 6px; }
+    .privilege-bullet { color: #3186ff; font-size: 12px; margin-top: 2px; }
+    .active-tag {
+      display: none; position: absolute; top: 12px; right: 12px;
+      background: #3186ff; color: #fff; font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+    }
+    .tier-card.is-active .active-tag { display: inline-block; }
+    /* Simple toggle switch */
+    .switch-wrapper { display: flex; justify-content: space-between; align-items: center; }
+    .switch-label { font-size: 14px; font-weight: 500; }
+    .switch-input { width: 40px; height: 20px; cursor: pointer; accent-color: #3186ff; }
+  </style>
+</head>
+<body>
+  <div class="widget-container">
+    
+    <div class="header-card">
+      <span class="header-eyebrow">Friday Check-In Standard</span>
+      <h2 style="margin:0; font-size: 22px;">Privilege Tier Matrix Simulator</h2>
+      <p style="margin:0; color:#555; font-size: 14px;">Adjust rolling GPA, missing assignments, and effort pillars to simulate real-time flowchart routing.</p>
+    </div>
+
+    <!-- Flowchart SVG Container -->
+    <div class="diagram-card">
+      <svg class="diagram-svg" viewBox="0 0 660 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="7.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto">
+            <path d="M 3 1.2 L 7.5 5 L 3 8.8" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="7.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto">
+            <path d="M 3 1.2 L 7.5 5 L 3 8.8" fill="none" stroke="#3186ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+
+        <!-- Connectors -->
+        <path id="path-start-missing" class="fc-path" d="M 170 60 L 170 100" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-missing-yes" class="fc-path" d="M 270 140 L 530 140 L 530 392" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-missing-no" class="fc-path" d="M 170 180 L 170 212" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-effort-gpa" class="fc-path" d="M 170 288 L 170 312" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-gpa-t1" class="fc-path" d="M 80 370 Q 80 400 80 402" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-gpa-t2" class="fc-path" d="M 140 370 Q 230 370 230 402" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-gpa-t3" class="fc-path" d="M 230 370 Q 380 370 380 402" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+        <path id="path-gpa-t4" class="fc-path" d="M 260 370 Q 530 370 530 402" fill="none" stroke="#555" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)" />
+
+        <!-- Labels -->
+        <rect x="350" y="130" width="48" height="20" rx="10" fill="#f2f0f0"/>
+        <text x="374" y="144" class="fc-subtext" text-anchor="middle" fill="#000">Yes</text>
+        <rect x="150" y="186" width="40" height="20" rx="10" fill="#f2f0f0"/>
+        <text x="170" y="200" class="fc-subtext" text-anchor="middle" fill="#000">No</text>
+
+        <!-- Nodes -->
+        <rect id="node-start" class="fc-node" x="70" y="16" width="200" height="44" rx="22" fill="#f2f0f0" stroke="#ccc" stroke-width="1.5"/>
+        <text x="170" y="42" class="fc-text" text-anchor="middle" font-size="14" font-weight="600" fill="#000">1. Friday Check-In</text>
+
+        <path id="node-missing" class="fc-node" d="M 70 140 L 170 100 L 270 140 L 170 180 Z" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="170" y="136" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">Missing Work?</text>
+        <text x="170" y="152" class="fc-subtext" text-anchor="middle" fill="#555">Portal Audit</text>
+
+        <rect id="node-effort" class="fc-node" x="50" y="220" width="240" height="68" rx="20" fill="#f2f0f0" stroke="#ccc" stroke-width="1.5"/>
+        <text x="170" y="246" class="fc-text" text-anchor="middle" font-size="14" font-weight="600" fill="#000">3. Effort Pillar Audit</text>
+        <text id="node-effort-score" x="170" y="266" class="fc-subtext" text-anchor="middle" fill="#555">Passed: 3 / 3 Criteria</text>
+
+        <path id="node-gpa" class="fc-node" d="M 50 370 L 170 320 L 290 370 L 170 420 Z" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="170" y="364" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">4. Evaluate Tier</text>
+        <text x="170" y="380" class="fc-subtext" text-anchor="middle" fill="#555">GPA + Effort</text>
+
+        <!-- Targets -->
+        <rect id="node-t1" class="fc-node" x="20" y="410" width="120" height="48" rx="16" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="80" y="432" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">Tier 1</text>
+        <text x="80" y="446" class="fc-subtext" text-anchor="middle" fill="#555">3.7 - 4.0</text>
+
+        <rect id="node-t2" class="fc-node" x="170" y="410" width="120" height="48" rx="16" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="230" y="432" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">Tier 2</text>
+        <text x="230" y="446" class="fc-subtext" text-anchor="middle" fill="#555">3.5 - 3.69</text>
+
+        <rect id="node-t3" class="fc-node" x="320" y="410" width="120" height="48" rx="16" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="380" y="432" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">Tier 3</text>
+        <text x="380" y="446" class="fc-subtext" text-anchor="middle" fill="#555">3.2 - 3.49</text>
+
+        <rect id="node-t4" class="fc-node" x="470" y="410" width="120" height="48" rx="16" fill="#fff" stroke="#ccc" stroke-width="1.5"/>
+        <text x="530" y="432" class="fc-text" text-anchor="middle" font-size="13" font-weight="600" fill="#000">Tier 4</text>
+        <text x="530" y="446" class="fc-subtext" text-anchor="middle" fill="#555">&lt; 3.2 / Missing</text>
+      </svg>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="control-deck">
+      <div class="control-group-title">1. Academic & Assignment Inputs</div>
+      
+      <div class="slider-row">
+        <div class="slider-header">
+          <label style="font-weight: 500; font-size: 14px;" for="gpa-slider">Rolling GPA</label>
+          <span style="font-family: monospace; font-weight: 700; font-size: 16px;" id="gpa-val">3.43</span>
+        </div>
+        <input type="range" id="gpa-slider" class="lumi-slider" min="2.00" max="4.00" step="0.01" value="3.43">
+      </div>
+
+      <div class="switch-wrapper" style="padding-top: 8px;">
+        <span class="switch-label">Missing Assignments Present?</span>
+        <input type="checkbox" id="missing-switch" class="switch-input">
+      </div>
+
+      <div class="control-group-title" style="margin-top:8px;">2. Effort Pillar Criteria (3 Standards)</div>
+      
+      <div class="toggles-grid">
+        <label class="lumi-checkbox-label">
+          <input type="checkbox" id="effort-portal" checked>
+          <span>Portal Clean (100% Sub)</span>
+        </label>
+        <label class="lumi-checkbox-label">
+          <input type="checkbox" id="effort-phone" checked>
+          <span>Phone Docked (M-Th)</span>
+        </label>
+        <label class="lumi-checkbox-label">
+          <input type="checkbox" id="effort-planner" checked>
+          <span>Google Tasks Utilized</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Privilege Tiers -->
+    <div class="tiers-container">
+      
+      <div class="tier-card" id="card-t1">
+        <span class="active-tag">Active</span>
+        <div class="tier-header">
+          <span class="tier-badge">Tier 1</span>
+          <span class="tier-name">Full Autonomy</span>
+          <span class="tier-gpa">3.7 - 4.0 GPA + High Effort</span>
+        </div>
+        <div class="privileges-list">
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Both Fri & Sat outings</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Unlimited weekend screens</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Sleepovers allowed</div>
+        </div>
+      </div>
+
+      <div class="tier-card" id="card-t2">
+        <span class="active-tag">Active</span>
+        <div class="tier-header">
+          <span class="tier-badge">Tier 2</span>
+          <span class="tier-name">Standard Flex</span>
+          <span class="tier-gpa">3.5-3.69 OR 3.2+ Boost</span>
+        </div>
+        <div class="privileges-list">
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> 1 night out (Fri OR Sat)</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> $30 max budget</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> 3 hrs/day screens (no sleepovers)</div>
+        </div>
+      </div>
+
+      <div class="tier-card" id="card-t3">
+        <span class="active-tag">Active</span>
+        <div class="tier-header">
+          <span class="tier-badge">Tier 3</span>
+          <span class="tier-name">Guided Access</span>
+          <span class="tier-gpa">3.2-3.49 Standard / Low Effort</span>
+        </div>
+        <div class="privileges-list">
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Daytime hangouts only</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> 1.5 hrs/day screens</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> $0 allowance</div>
+        </div>
+      </div>
+
+      <div class="tier-card" id="card-t4">
+        <span class="active-tag">Active</span>
+        <div class="tier-header">
+          <span class="tier-badge">Tier 4</span>
+          <span class="tier-name">Restricted</span>
+          <span class="tier-gpa">&lt; 3.2 GPA OR Missing Work</span>
+        </div>
+        <div class="privileges-list">
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Social outings paused</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Screens for homework only</div>
+          <div class="privilege-item"><span class="privilege-bullet">✦</span> Daily 20-min check-in</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const state = { gpa: 3.43, hasMissing: false, effortPortal: true, effortPhone: true, effortPlanner: true };
+
+    function calculateTier() {
+      if (state.hasMissing) return 4;
+      const effortScore = (state.effortPortal ? 1 : 0) + (state.effortPhone ? 1 : 0) + (state.effortPlanner ? 1 : 0);
+      const isHighEffort = effortScore === 3;
+
+      if (state.gpa >= 3.70) return isHighEffort ? 1 : 3;
+      if (state.gpa >= 3.50) return isHighEffort ? 2 : 3;
+      if (state.gpa >= 3.20) return isHighEffort ? 2 : 3; // Boost
+      return 4;
+    }
+
+    function updateViz() {
+      const activeTier = calculateTier();
+      const effortScore = (state.effortPortal ? 1 : 0) + (state.effortPhone ? 1 : 0) + (state.effortPlanner ? 1 : 0);
+      document.getElementById('node-effort-score').textContent = `Passed: ${effortScore} / 3 Criteria`;
+
+      const primary = '#3186ff', highlight = '#dcf1ff', dull = '#ccc', dullFill = '#fff';
+      
+      // Reset
+      ['path-start-missing', 'path-missing-yes', 'path-missing-no', 'path-effort-gpa', 'path-gpa-t1', 'path-gpa-t2', 'path-gpa-t3', 'path-gpa-t4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.setAttribute('stroke', '#555'); el.setAttribute('stroke-width', '1.5');
+        el.setAttribute('opacity', '0.4'); el.setAttribute('marker-end', 'url(#arrow)');
+      });
+      ['node-start', 'node-missing', 'node-effort', 'node-gpa', 'node-t1', 'node-t2', 'node-t3', 'node-t4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.setAttribute('stroke', dull); el.setAttribute('stroke-width', '1.5');
+        el.setAttribute('fill', dullFill); el.setAttribute('opacity', '0.5');
+      });
+
+      const activateNode = id => {
+        const el = document.getElementById(id);
+        el.setAttribute('stroke', primary); el.setAttribute('stroke-width', '2');
+        el.setAttribute('fill', highlight); el.setAttribute('opacity', '1');
+      };
+      const activatePath = id => {
+        const el = document.getElementById(id);
+        el.setAttribute('stroke', primary); el.setAttribute('stroke-width', '2.5');
+        el.setAttribute('opacity', '1'); el.setAttribute('marker-end', 'url(#arrow-active)');
+      };
+
+      // Trace
+      activateNode('node-start'); activatePath('path-start-missing'); activateNode('node-missing');
+      if (state.hasMissing) {
+        activatePath('path-missing-yes'); activateNode('node-t4');
+      } else {
+        activatePath('path-missing-no'); activateNode('node-effort'); activatePath('path-effort-gpa'); activateNode('node-gpa');
+        activatePath(`path-gpa-t${activeTier}`); activateNode(`node-t${activeTier}`);
+      }
+
+      // Cards
+      [1, 2, 3, 4].forEach(t => {
+        const card = document.getElementById(`card-t${t}`);
+        if (t === activeTier) card.classList.add('is-active');
+        else card.classList.remove('is-active');
+      });
+    }
+
+    // Listeners
+    document.getElementById('gpa-slider').addEventListener('input', e => {
+      state.gpa = parseFloat(e.target.value);
+      document.getElementById('gpa-val').textContent = state.gpa.toFixed(2);
+      updateViz();
+    });
+    document.getElementById('missing-switch').addEventListener('change', e => { state.hasMissing = e.target.checked; updateViz(); });
+    document.getElementById('effort-portal').addEventListener('change', e => { state.effortPortal = e.target.checked; updateViz(); });
+    document.getElementById('effort-phone').addEventListener('change', e => { state.effortPhone = e.target.checked; updateViz(); });
+    document.getElementById('effort-planner').addEventListener('change', e => { state.effortPlanner = e.target.checked; updateViz(); });
+
+    updateViz();
+  </script>
+</body>
+</html>
+
+```
